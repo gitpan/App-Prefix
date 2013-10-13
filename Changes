@@ -1,5 +1,8 @@
 Revision history for App-Prefix
 
+0.05    2013/10/13
+        Fix documentation for --nospace, and some other cleanups.
+
 0.001    2013/10/13
         Initial release.
         Implements [--text=prefix:] [--[u]timestamp] [-hoststamp] [-nospace]

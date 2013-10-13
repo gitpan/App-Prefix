@@ -11,7 +11,7 @@ use File::Basename;
 use POSIX;
 
 my $prog=basename( $0 );
-my $cvs_id = q{$Id: prefix,v 1.6 2013/10/13 21:11:05 joshr Exp $};
+my $cvs_id = q{$Id: prefix,v 1.9 2013/10/13 21:30:55 joshr Exp $};
 my $help;
 my $prefix = "";
 my $suffix;
@@ -201,7 +201,7 @@ tails a file, showing each line with a hostname and a timestamp like.
 So if we were tailing a growing file with lines like:
 
     OK: System operational
-    Warning: Disk bandwitch saturated
+    Warning: Disk bandwidth saturated
 
 we would get real-time output like:
 
@@ -237,17 +237,17 @@ Add the hostname
 
 =head2 --nospace
 
-Don't put spaces between data added 
+Don't put a space between the original line read and the data added 
 
 =head2 --suffix
 
 Show added data at end of line, not start of line
 
-=head1 --elapsed
+=head2 --elapsed
 
 Show time elapsed since last line seen
 
-=head1 --quote
+=head2 --quote
 
 Show each original line read in single quotes
 
@@ -255,8 +255,7 @@ Show each original line read in single quotes
 
 Josh Rabinowitz <joshr>
     
-=head1 SEE ALSO
-    
-L<DBIx::FileStore>, L<fdbcat>,  L<fdbls>, L<fdbmv>,  L<fdbput>,  L<fdbrm>,  L<fdbstat>,  L<fdbtidy>
+=for future_head1 SEE ALSO
+=for future L<DBIx::FileStore>, L<fdbcat>,  L<fdbls>, L<fdbmv>,  L<fdbput>,  L<fdbrm>,  L<fdbstat>,  L<fdbtidy>
     
 =cut   
