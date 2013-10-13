@@ -1,0 +1,262 @@
+#!/usr/bin/perl -w
+# prefix: puts a prefix before each incoming line
+# Copyright 2010-2013 Josh Rabinowitz.
+
+use strict;
+use warnings;
+use Getopt::Long; 
+use Sys::Hostname;
+use Time::HiRes qw(time);
+use File::Basename;
+use POSIX;
+
+my $prog=basename( $0 );
+my $cvs_id = q{$Id: prefix,v 1.6 2013/10/13 21:11:05 joshr Exp $};
+my $help;
+my $prefix = "";
+my $suffix;
+my $nospace;
+my $quote;
+my $timestamp;
+my $utimestamp;
+my $elapsedstamp;
+my $diffstamp;
+my $hoststamp;
+#my $loadstamp; # deferred feature
+#my $memstamp;  # deferred feature
+my $hostname = Sys::Hostname::hostname();
+
+# Usage() : returns usage information
+sub Usage {
+    "$prog [--text=prefix:] [--[u]timestamp] [-hoststamp] [-nospace]\n" .
+    #"     [--loadstamp]\n" .  # DEFERRED
+    "      [--diffstamp] [--elapsedstamp] [--quote] [FILES]\n" .
+    "   --hoststamp shows hostname\n" .
+    "   --timestamp shows timestamp, -utimestamp with microsecond\n" . 
+    "   --elapsedstamp shows time run began" . 
+    "   --diffstamp shows time between last lines\n" .
+    "   --quote shows each original line in single quotes\n" .
+    "   --suffix puts data at end, not start\n" .
+    "     filter which prepends data like hostname and time information to lines passed\n";
+}
+
+
+# call main()
+main();
+
+# main()
+sub main {
+    GetOptions(
+        "h|help"     => \$help,
+        "text=s"     => \$prefix,   # this is better than 'prefix' because it might be a suffix
+        "prefix=s"   => \$prefix,
+        "suffix!"    => \$suffix,
+        "nospace!"   => \$nospace,
+        "quote!"     => \$quote,
+        "timestamp!" => \$timestamp,
+        "utimestamp!" => \$utimestamp,
+        "diffstamp!" => \$diffstamp,
+        "elapsedstamp!" => \$elapsedstamp,
+        "hoststamp!"      => \$hoststamp,
+        #"loadstamp!"      => \$loadstamp,
+        #"memstamp!"       => \$memstamp,
+    ) or die Usage();
+    die Usage() if $help;
+    $|++;
+    my $startt = time();
+    my $lasttime = $startt;   # use to store the prev time for diffstamp
+    my $time = $startt;   # use to store the current time if --timestamp or --utimestamp
+    while(<>) {
+        chop() while ( /(\n|\r)$/ ); # strip all trailing newlines
+        $_ = "'$_'" if $quote;
+        my @prefixes = ();
+        push( @prefixes, $prefix ) if $prefix;
+        if ($hoststamp) {
+            push (@prefixes, $hostname);
+        }
+        if ($timestamp || $utimestamp || $elapsedstamp || $diffstamp) {
+            $time = time();
+        }
+        if ($timestamp || $utimestamp) {
+            my $str = getdatetime( $time );
+            if ($utimestamp) {
+                my $frac = sprintf("%0.5f", $time - int($time));
+                $frac =~ s/^0//;    # remove leading 0, but not the .
+                $str .= $frac;
+            }
+            push( @prefixes, $str );
+        }
+        if ($elapsedstamp) {
+            push(@prefixes, 
+                sprintf("%s elapsed", convert_seconds_to_human_time( $time - $startt, 5 ) ) );
+        }
+        if ($diffstamp) {
+            push(@prefixes, 
+                sprintf("%s diff", convert_seconds_to_human_time( $time - $lasttime, 5 ) ) );
+        }
+        #if ($loadstamp) {  # DEFERRED FEATURE
+        #    require CPULoad;
+        #    my @loads = CPULoad::get_loads();
+        #    push(@prefixes, sprintf ("load:%0.2f", $loads[0]));
+        #}
+        #if ($memstamp) {   # DEFERRED FEATURE
+        #    require MemInfo;
+        #    my $info = MemInfo::get_meminfo();
+        #    my ($free, $cached, $swapped) = ($info->{MemFree}, $info->{Cached}, $info->{SwapCached});
+        #    my $str = sprintf( "%s free, %s cached, %s swapped", 
+        #        convert_bytes_to_human_size( $free ),
+        #        convert_bytes_to_human_size( $cached ),
+        #        convert_bytes_to_human_size( $swapped ) );
+        #    push(@prefixes, $str);
+        #}
+        my $out = "";
+        if (@prefixes) {
+            if ($suffix) { # not prefix, suffix
+                $out .= $_; 
+                $out .= " " unless $nospace;
+            }
+            $out .= join(" ", @prefixes);
+            if (!$suffix) {  # yes suffix
+                $out .= " " unless $nospace;
+                $out .= $_; 
+            }
+        } else {
+            $out = $_;
+        }
+        print $out, "\n";
+        $lasttime = $time;
+    }
+}
+
+sub getdatetime { 
+    my $t = shift || time();
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($t);
+    #return sprintf("%04d-%02d-%02d %02d:%02d:%02d", 1900+$year, $mon+1, $mday, $hour, $min, $sec);
+    return POSIX::strftime( "%Y-%m-%d %H:%M:%S", $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst);
+}
+
+############################################
+# converts seconds to human-readable.
+# I couldn't find a module on cpan that did (exactly) this :)
+# the criteria is a short string describing the time duration, that's easy to parse.
+# (DateTime::Format::Human::Duration can almost do it, but won't show fractional durations like "1.2 mins"
+sub convert_seconds_to_human_time {
+    my $t = shift;
+    my $precision = shift || 2;
+    my $format = '%1.' . ${precision} . "f";
+
+    # start from year down
+    if (abs($t) >= 86400 * 365.25) {
+        return sprintf($format, $t/(86400 * 365.25)) . " years"; 
+    } 
+
+    # Considered, but removed, months entries in convert_seconds_to_human_time()
+    # 1) hard to abbreviate months in 3 chars
+    # 2) 2.1 months looks especially weird
+    # 3) months are much more variable-sized than any other time unit
+    #    therefore more ambiguous and complex to compute.
+    #
+    #my $seconds_per_month = (365.25 / 12) * 86400;    # mythical equal-sized months
+    #if (abs($t) >= $seconds_per_month) {
+    #    return sprintf($format, $t/$seconds_per_month) . " mnths"; 
+    #} 
+    #
+    if (abs($t) >= 86400) {
+        return sprintf($format, $t/86400) . " days"; 
+    } 
+    if (abs($t) >= 60*60) {
+        return sprintf($format, $t/3600) . " hrs"; 
+    }
+    if (abs($t) >= 60) {
+        return sprintf($format, $t/60) . " mins"; 
+    }
+
+    # now from 1/100th of a second up
+    if (abs($t) <= 0.01) {
+        #return sprintf("%0.3f", $t) . " secs"; 
+    	return sprintf($format, $t*1000) . " ms"; 
+    }
+    if (abs($t) <= 0.1) {   # note that we ignore $format here (!). We know the first two digits are 0.
+        my $prec = MAX(2, $precision);
+    	return sprintf("%0.${prec}f", $t) . " secs"; 
+    }
+    #if (abs($t) <= 0.01) {
+    #	return sprintf("%0.3f", $t*1000) . " ms"; 
+    #}
+    return sprintf("$format secs", $t); 
+}
+
+
+=pod
+
+=head1 NAME     
+            
+prefix - prefixes hostname time information or more to lines from stdin (or read from files)
+                    
+=head1 SYNOPSIS     
+                
+    % tail -f /var/log/some.log | prefix -host -timestamp 
+
+tails a file, showing each line with a hostname and a timestamp like. 
+So if we were tailing a growing file with lines like:
+
+    OK: System operational
+    Warning: Disk bandwitch saturated
+
+we would get real-time output like:
+
+    arachnid.example.com 2013-10-13 16:55:49 Warning: Things are wonky: disks spinning backwards
+    arachnid.example.com 2013-10-13 16:55:50 Error: Data read wackbards
+    arachnid.example.com 2013-10-13 16:56:10 OK: Spacetime reversal complete
+
+Note that the hostname (arachnid.example.com) and the date have been prepended.
+
+See options below for more details.
+
+=head1 DESCRIPTION 
+
+A text filter that prepends (or appends) data to lines read from stdin or named files, and echos them to stdout
+
+=head1 OPTIONS
+
+=head2 -t='example',  --text='arbitrary text here'
+
+add any particular string you like.
+                
+=head2 -t or --timestamp
+
+Add a timestamp
+                
+=head2 -u or --utimestamp
+
+Add a timestamp, showing fractions of a second
+                
+=head2 --hoststamp
+
+Add the hostname
+
+=head2 --nospace
+
+Don't put spaces between data added 
+
+=head2 --suffix
+
+Show added data at end of line, not start of line
+
+=head1 --elapsed
+
+Show time elapsed since last line seen
+
+=head1 --quote
+
+Show each original line read in single quotes
+
+=head1 AUTHOR
+
+Josh Rabinowitz <joshr>
+    
+=head1 SEE ALSO
+    
+L<DBIx::FileStore>, L<fdbcat>,  L<fdbls>, L<fdbmv>,  L<fdbput>,  L<fdbrm>,  L<fdbstat>,  L<fdbtidy>
+    
+=cut   
