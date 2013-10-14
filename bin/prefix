@@ -11,11 +11,12 @@ use Sys::Hostname;
 use Time::HiRes qw(time);
 use File::Basename;
 use POSIX;
+use List::Util qw(max);
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 my $prog=basename( $0 );
-my $cvs_id = q{$Id: prefix,v 1.12 2013/10/14 03:58:31 joshr Exp $};
+my $cvs_id = q{$Id: prefix,v 1.13 2013/10/14 17:55:28 joshr Exp $};
 my $help;
 my $version;
 my $prefix = "";
@@ -192,7 +193,7 @@ sub convert_seconds_to_human_time {
     	return sprintf($format, $t*1000) . " ms"; 
     }
     if (abs($t) <= 0.1) {   # note that we ignore $format here (!). We know the first two digits are 0.
-        my $prec = MAX(2, $precision);
+        my $prec = max(2, $precision);
     	return sprintf("%0.${prec}f", $t) . " secs"; 
     }
     #if (abs($t) <= 0.01) {

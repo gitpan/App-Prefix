@@ -28,13 +28,14 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "File::Basename" => 0,
     "Getopt::Long" => 0,
+    "List::Util" => 0,
     "POSIX" => 0,
     "Sys::Hostname" => 0,
     "Time::HiRes" => 0,
     "strict" => 0,
     "warnings" => 0
   },
-  "VERSION" => "0.07",
+  "VERSION" => "0.08",
   "test" => {
     "TESTS" => "t/*.t"
   }

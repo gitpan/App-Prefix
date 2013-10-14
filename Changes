@@ -1,5 +1,9 @@
 Revision history for App-Prefix
 
+0.08    2013/10/14
+        bugfix - use List::Util qw(max)
+        Bring back lib/App/Prefix.pm for cpan happiness
+
 0.07    2013/10/14
         Added --version option, autogenerate README, 
         remove lib/App/Prefix.pm, improve tests, 
