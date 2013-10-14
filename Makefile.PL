@@ -11,7 +11,11 @@ use ExtUtils::MakeMaker 6.30;
 my %WriteMakefileArgs = (
   "ABSTRACT" => "provides 'prefix' filter, which prepends data to lines passed",
   "AUTHOR" => "joshr <joshr\@cpan.org>",
-  "BUILD_REQUIRES" => {},
+  "BUILD_REQUIRES" => {
+    "File::Slurp" => 0,
+    "File::Temp" => 0,
+    "Test::More" => 0
+  },
   "CONFIGURE_REQUIRES" => {
     "ExtUtils::MakeMaker" => "6.30"
   },
@@ -21,8 +25,16 @@ my %WriteMakefileArgs = (
   ],
   "LICENSE" => "perl",
   "NAME" => "App::Prefix",
-  "PREREQ_PM" => {},
-  "VERSION" => "0.05",
+  "PREREQ_PM" => {
+    "File::Basename" => 0,
+    "Getopt::Long" => 0,
+    "POSIX" => 0,
+    "Sys::Hostname" => 0,
+    "Time::HiRes" => 0,
+    "strict" => 0,
+    "warnings" => 0
+  },
+  "VERSION" => "0.06",
   "test" => {
     "TESTS" => "t/*.t"
   }

@@ -1,5 +1,8 @@
 Revision history for App-Prefix
 
+0.06    2013/10/13
+        Improve prereq declarations
+
 0.05    2013/10/13
         Fix documentation for --nospace, and some other cleanups.
 
