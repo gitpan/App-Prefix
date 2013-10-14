@@ -1,22 +1,29 @@
-#!perl -T
+#!perl 
 
 use strict;
 use warnings;
-use Test::More tests => 4;
-use App::Prefix;
+use Test::More tests => 3;
+#use App::Prefix;
 
-my $version = $App::Prefix::VERSION;
+my $version_line = `$^X bin/prefix -version`;
+chomp($version_line);
+my ($name, $version) = split( ' ', $version_line );
 (my $version_regex = $version) =~ s{\.}{\\.};
+diag( "Testing that versions are $version" );
+
 my $date = scalar(localtime(time()));
-#my $year = substr($date, -4);
+my $actual_year = substr($date, -4);
 my $year = 2013;
+if ($year != $actual_year) {
+    diag( "update next release: copyrights for year $year" );
+}
 
 in_file_ok( "dist.ini",              dist_ini_version => 'version\s*=.*' . $version_regex);
 in_file_ok( "Changes",               version          => "^$version_regex" );
 
 in_file_ok( "bin/prefix",            copyright        => "Copyright.*$year" );
-in_file_ok( "lib/App/Prefix.pm",     code_version     => 'VERSION\s*=.*' . $version_regex, 
-                                     pod_version      => 'Version\s+'    . $version_regex );
+#in_file_ok( "lib/App/Prefix.pm",     code_version     => 'VERSION\s*=.*' . $version_regex, 
+#                                     pod_version      => 'Version\s+'    . $version_regex );
 
 sub in_file_ok {
     my ($filename, %regex) = @_;

@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 # prefix: puts a prefix before each incoming line
 # Copyright 2010-2013 Josh Rabinowitz.
+#
+# ABSTRACT: provides 'prefix' filter, which prepends data to lines passed
 
 use strict;
 use warnings;
@@ -10,12 +12,15 @@ use Time::HiRes qw(time);
 use File::Basename;
 use POSIX;
 
+our $VERSION = '0.07';
+
 my $prog=basename( $0 );
-my $cvs_id = q{$Id: prefix,v 1.9 2013/10/13 21:30:55 joshr Exp $};
+my $cvs_id = q{$Id: prefix,v 1.12 2013/10/14 03:58:31 joshr Exp $};
 my $help;
+my $version;
 my $prefix = "";
 my $suffix;
-my $nospace;
+my $space = 1;
 my $quote;
 my $timestamp;
 my $utimestamp;
@@ -26,17 +31,20 @@ my $hoststamp;
 #my $memstamp;  # deferred feature
 my $hostname = Sys::Hostname::hostname();
 
+
 # Usage() : returns usage information
 sub Usage {
-    "$prog [--text=prefix:] [--[u]timestamp] [-hoststamp] [-nospace]\n" .
-    #"     [--loadstamp]\n" .  # DEFERRED
-    "      [--diffstamp] [--elapsedstamp] [--quote] [FILES]\n" .
+    "$prog [--text=prefix:] [--timestamp] [---utimestamp] [-hoststamp] [-no-space]\n" .
+    #"     [--loadstamp] [--memstamp\n" .  # DEFERRED FEATURES
+    "      [--diffstamp] [--elapsedstamp] [--quote] [--version] [FILES]\n" .
     "   --hoststamp shows hostname\n" .
     "   --timestamp shows timestamp, -utimestamp with microsecond\n" . 
     "   --elapsedstamp shows time run began" . 
     "   --diffstamp shows time between last lines\n" .
     "   --quote shows each original line in single quotes\n" .
     "   --suffix puts data at end, not start\n" .
+    "   --no-space puts no space between line read and additional data\n" .
+    "   --version shows version and exits\n" .
     "     filter which prepends data like hostname and time information to lines passed\n";
 }
 
@@ -47,21 +55,28 @@ main();
 # main()
 sub main {
     GetOptions(
-        "h|help"     => \$help,
-        "text=s"     => \$prefix,   # this is better than 'prefix' because it might be a suffix
-        "prefix=s"   => \$prefix,
-        "suffix!"    => \$suffix,
-        "nospace!"   => \$nospace,
-        "quote!"     => \$quote,
-        "timestamp!" => \$timestamp,
-        "utimestamp!" => \$utimestamp,
-        "diffstamp!" => \$diffstamp,
-        "elapsedstamp!" => \$elapsedstamp,
-        "hoststamp!"      => \$hoststamp,
+        "h|help!"          => \$help,
+        "version!"         => \$version,
+        "text=s"           => \$prefix,   # this is better than 'prefix' because it might be a suffix
+        #"prefix=s"        => \$prefix,  # removed because 'prefix -prefix=A' is weird. Use -text='test'
+        "suffix!"          => \$suffix,
+        "space!"         => \$space,
+        "quote!"           => \$quote,
+        "timestamp!"       => \$timestamp,
+        "utimestamp!"      => \$utimestamp,
+        "diffstamp!"       => \$diffstamp,
+        "elapsedstamp!"    => \$elapsedstamp,
+        "hoststamp!"       => \$hoststamp,
         #"loadstamp!"      => \$loadstamp,
         #"memstamp!"       => \$memstamp,
     ) or die Usage();
     die Usage() if $help;
+
+    if ($version) {
+        print "$prog $VERSION\n";
+        exit(0);
+    }
+
     $|++;
     my $startt = time();
     my $lasttime = $startt;   # use to store the prev time for diffstamp
@@ -113,11 +128,11 @@ sub main {
         if (@prefixes) {
             if ($suffix) { # not prefix, suffix
                 $out .= $_; 
-                $out .= " " unless $nospace;
+                $out .= " " if $space;
             }
             $out .= join(" ", @prefixes);
             if (!$suffix) {  # yes suffix
-                $out .= " " unless $nospace;
+                $out .= " " if $space;
                 $out .= $_; 
             }
         } else {
@@ -171,7 +186,7 @@ sub convert_seconds_to_human_time {
         return sprintf($format, $t/60) . " mins"; 
     }
 
-    # now from 1/100th of a second up
+    # now from 1/100th of a second and smaller...
     if (abs($t) <= 0.01) {
         #return sprintf("%0.3f", $t) . " secs"; 
     	return sprintf($format, $t*1000) . " ms"; 
@@ -219,15 +234,15 @@ A text filter that prepends (or appends) data to lines read from stdin or named 
 
 =head1 OPTIONS
 
-=head2 -t='example',  --text='arbitrary text here'
+=head2 --text='arbitrary text here'
 
 add any particular string you like.
                 
-=head2 -t or --timestamp
+=head2 --timestamp
 
 Add a timestamp
                 
-=head2 -u or --utimestamp
+=head2 --utimestamp
 
 Add a timestamp, showing fractions of a second
                 
@@ -235,7 +250,7 @@ Add a timestamp, showing fractions of a second
 
 Add the hostname
 
-=head2 --nospace
+=head2 --no-space
 
 Don't put a space between the original line read and the data added 
 

@@ -1,9 +1,9 @@
 #!perl -T
 
-use Test::More tests => 2;
+use Test::More tests => 1;
 
 BEGIN { 
-    use_ok( 'App::Prefix' ); 
+    #use_ok( 'App::Prefix' ); 
     ok( -e "bin/prefix", "bin/prefix exists" );
     #ok( -x "bin/prefix", "bin/prefix is executable" );
 }

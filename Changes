@@ -1,12 +1,17 @@
 Revision history for App-Prefix
 
+0.07    2013/10/14
+        Added --version option, autogenerate README, 
+        remove lib/App/Prefix.pm, improve tests, 
+        doc additions and changes.
+
 0.06    2013/10/13
         Improve prereq declarations
 
 0.05    2013/10/13
-        Fix documentation for --nospace, and some other cleanups.
+        Fix documentation for --no-space, and some other cleanups.
 
 0.001    2013/10/13
         Initial release.
-        Implements [--text=prefix:] [--[u]timestamp] [-hoststamp] [-nospace]
-              [--diffstamp] [--elapsedstamp] [--quote] 
+        Implements [--text=prefix:] [--timestamp] [--utimestamp] [-hoststamp] [-no-space]
+        [--diffstamp] [--elapsedstamp] [--quote] 
