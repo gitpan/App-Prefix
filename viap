@@ -1,0 +1,5 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+
+exec("vim bin/prefix lib/App/Prefix.pm Changes dist.ini -o" );

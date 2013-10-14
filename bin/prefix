@@ -13,10 +13,10 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 my $prog=basename( $0 );
-my $cvs_id = q{$Id: prefix,v 1.13 2013/10/14 17:55:28 joshr Exp $};
+my $cvs_id = q{$Id: prefix,v 1.14 2013/10/14 22:23:26 joshr Exp $};
 my $help;
 my $version;
 my $prefix = "";

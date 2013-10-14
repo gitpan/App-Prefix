@@ -6,7 +6,7 @@ use Test::More;
 #use Test::More tests=>4;
 
 if ( $ENV{RELEASE_TESTING} ) {
-    plan( tests=>1 );
+    plan( tests=>2 );
 } else {
     plan( skip_all => "Author tests not required for installation, use env var RELEASE_TESTING to enable" );
 }
@@ -27,6 +27,8 @@ my $perl = "$^X -w -Mstrict";   # warnings and strict on
 #1) TEST fdbls: no files in /testfolder
 my @out = btick( "$perl bin/prefix -host t/sample.dat" );
 cmp_ok( scalar(@out), '==', 5, "prefix: read t/sample.dat" );
+cmp_ok( $out[0], '=~', '.* OK: System operational', "line from test file looks as expected" );
+
 
 
 # like backtick, but auto-testing, and prettier
