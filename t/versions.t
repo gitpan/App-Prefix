@@ -2,13 +2,14 @@
 
 use strict;
 use warnings;
-use Test::More tests => 3;
+use Test::More tests => 5;
 #use App::Prefix;
 
+# run bin/prefix to see what version it says it is
 my $version_line = `$^X bin/prefix -version`;
 chomp($version_line);
 my ($name, $version) = split( ' ', $version_line );
-(my $version_regex = $version) =~ s{\.}{\\.};
+(my $version_regex = $version) =~ s{\.}{\\.}; # turns 0.01 to 0\.01
 diag( "Testing that versions are $version" );
 
 my $date = scalar(localtime(time()));
@@ -19,11 +20,14 @@ if ($year != $actual_year) {
 }
 
 in_file_ok( "dist.ini",              dist_ini_version => 'version\s*=.*' . $version_regex);
+
 in_file_ok( "Changes",               version          => "^$version_regex" );
 
+in_file_ok( "bin/prefix",            version          => 'our\s+\$VERSION.*=.*' . $version_regex);
 in_file_ok( "bin/prefix",            copyright        => "Copyright.*$year" );
-#in_file_ok( "lib/App/Prefix.pm",     code_version     => 'VERSION\s*=.*' . $version_regex, 
-#                                     pod_version      => 'Version\s+'    . $version_regex );
+
+in_file_ok( "lib/App/Prefix.pm",     code_version     => 'VERSION\s*=.*' . $version_regex, 
+                                     pod_version      => 'Version\s+'    . $version_regex );
 
 sub in_file_ok {
     my ($filename, %regex) = @_;
