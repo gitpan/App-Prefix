@@ -14,8 +14,8 @@ t/boilerplate.t
 t/exes.t
 t/one_word.dat
 t/prefix.t
-t/release-pod-coverage.t
 t/release-pod-syntax.t
 t/sample.dat
+t/two_words.dat
 t/versions.t
 viap

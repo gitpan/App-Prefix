@@ -13,10 +13,9 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 my $prog=basename( $0 );
-my $cvs_id = q{$Id: prefix,v 1.15 2013/10/15 03:01:39 joshr Exp $};
 my $help;
 my $version;
 my $user_text = "";
@@ -38,15 +37,18 @@ sub Usage {
     "$prog [--text=prefix:] [--timestamp] [---utimestamp] [-hoststamp] [-no-space]\n" .
     #"     [--loadstamp] [--memstamp]\n" .  # DEFERRED FEATURES
     "      [--diffstamp] [--elapsedstamp] [--quote] [--version] [FILES]\n" .
+    "   --text='your_text_here:' prefixes each line with the desired text\n" . 
     "   --hoststamp shows hostname\n" .
-    "   --timestamp shows timestamp, -utimestamp with microsecond\n" . 
-    "   --elapsedstamp shows time run began" . 
-    "   --diffstamp shows time between last lines\n" .
+    "   --timestamp shows timestamp,\n" . 
+    "    -utimestamp shows with microsecond (if this and -timestamps are used, this prevails)\n" . 
+    "   --elapsedstamp shows time since run began" . 
+    "   --diffstamp shows time between last lines read\n" .
     "   --quote shows each original line in single quotes\n" .
     "   --suffix puts data at end, not start\n" .
     "   --no-space puts no space between line read and additional data\n" .
     "   --version shows version and exits\n" .
-    "     filter which prepends data (like the time or the hostname) to lines passed\n";
+    "     $prog is a filter which prepends data (like the time or the hostname) to lines read \n" .
+    "     from passed filenames or stdin.\n";
 }
 
 
