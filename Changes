@@ -1,7 +1,11 @@
 Revision history for App-Prefix
 
+0.12    2013/10/16
+        Document the --elapsed feature better
+        Other documentation improvements
+
 0.11    2013/10/16
-        More self tests, better --help output.
+        More self tests, better --help output
 
 0.10    2013/10/14
         More thorough self-tests

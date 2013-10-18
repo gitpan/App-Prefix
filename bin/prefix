@@ -13,7 +13,7 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 
 my $prog=basename( $0 );
 my $help;
@@ -34,6 +34,7 @@ my $hostname = Sys::Hostname::hostname();
 
 # Usage() : returns usage information
 sub Usage {
+    "$prog: A program that adds items to the start or end of lines read from stdin or named files\n" . 
     "$prog [--text=prefix:] [--timestamp] [---utimestamp] [-hoststamp] [-no-space]\n" .
     #"     [--loadstamp] [--memstamp]\n" .  # DEFERRED FEATURES
     "      [--diffstamp] [--elapsedstamp] [--quote] [--version] [FILES]\n" .
@@ -250,13 +251,15 @@ The above example would prefix each line output from some_program with the time 
 
 Add a timestamp to each line
 
+    % ls -l | prefix -timestamp 
+                
 =head2 --utimestamp
 
 Add a timestamp, showing fractions of a second to each line
 
 Example:
     
-    % ls -l | prefix -timestamp 
+    % ls -l | prefix -utimestamp 
                 
 =head2 --hoststamp
 
@@ -288,7 +291,11 @@ would output
 
 =head2 --elapsed
 
-Show time elapsed since last line seen. Shows fractional time.
+Show time elapsed since last line seen. Shows fractional time. 
+This can be useful when tailing logfiles or output of programs
+and you want to see which lines to longer or shorter to output.
+
+
 
 =head2 --quote
 
