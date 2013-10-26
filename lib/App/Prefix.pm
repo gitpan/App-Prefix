@@ -2,7 +2,9 @@ use strict;
 use warnings;
 package App::Prefix;
 
-our $VERSION = '0.16'; 
+our $VERSION = '0.17'; 
+
+1;
 
 # ABSTRACT: provides 'prefix' filter, which prepends data to lines passed
 #
@@ -10,4 +12,3 @@ our $VERSION = '0.16';
 # 
 #  Copyright 2010-2013 Josh Rabinowitz.
 #
-# 1;

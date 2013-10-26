@@ -34,11 +34,10 @@ my %WriteMakefileArgs = (
   "TEST_REQUIRES" => {
     "File::Slurp" => 0,
     "File::Spec::Functions" => 0,
-    "File::Temp" => 0,
     "IPC::Run" => 0,
     "Test::More" => 0
   },
-  "VERSION" => "0.16",
+  "VERSION" => "0.17",
   "test" => {
     "TESTS" => "t/*.t"
   }

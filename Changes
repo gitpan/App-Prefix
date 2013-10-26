@@ -1,10 +1,14 @@
 Revision history for App-Prefix
 
+0.17    2013/10/25
+        Add --raw option to always show elapsed times in seconds
+        Remove another redundant test file
+
 0.16    2013/10/25
-        Removed another redundant test file
+        Remove another redundant test file
 
 0.15    2013/10/25
-        Removed redundant test file
+        Remove redundant test file
 
 0.14    2013/10/25
         Correct documentation of --elapsedstamp option
@@ -31,11 +35,11 @@ Revision history for App-Prefix
         Improve self-tests
 
 0.08    2013/10/14
-        bugfix - use List::Util qw(max)
+        Bugfix - use List::Util qw(max)
         Bring back lib/App/Prefix.pm for cpan happiness
 
 0.07    2013/10/14
-        Added --version option, autogenerate README, 
+        Add --version option, autogenerate README, 
         remove lib/App/Prefix.pm, improve tests, 
         doc additions and changes
 

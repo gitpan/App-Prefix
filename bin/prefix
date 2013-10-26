@@ -2,6 +2,8 @@
 # prefix: puts a prefix before each incoming line
 # Copyright 2010-2013 Josh Rabinowitz.
 #
+# note that this 'ABSTRACT' winds up in the readme
+#
 # ABSTRACT: provides 'prefix' filter, which prepends data to lines passed
 
 use strict;
@@ -10,10 +12,10 @@ use Getopt::Long;
 use Sys::Hostname;
 use Time::HiRes qw(time);
 use File::Basename;
-use POSIX;
+use POSIX; # for strftime
 use List::Util qw(max);
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 my $prog=basename( $0 );
 my $help;
@@ -26,6 +28,7 @@ my $timestamp;
 my $utimestamp;
 my $elapsedstamp;
 my $diffstamp;
+my $raw;
 my $hoststamp;
 #my $loadstamp; # deferred feature
 #my $memstamp;  # deferred feature
@@ -37,18 +40,19 @@ sub Usage {
     "$prog: A program that adds items to the start or end of lines read from stdin or named files\n" . 
     "$prog [--text=prefix:] [--timestamp] [---utimestamp] [-hoststamp] [-no-space]\n" .
     #"     [--loadstamp] [--memstamp]\n" .  # DEFERRED FEATURES
-    "      [--diffstamp] [--elapsedstamp] [--quote] [--version] [FILES]\n" .
-    "   --text='your_text_here:' prefixes each line with the desired text\n" . 
-    "   --hoststamp shows hostname\n" .
-    "   --timestamp shows timestamp,\n" . 
-    "    -utimestamp shows with microsecond (if this and -timestamps are used, this prevails)\n" . 
+    "      [--diffstamp] [--elapsedstamp] [--raw] [--quote] [--version] [FILES]\n" .
+    "   --text='your_text_here' prefixes each line with the desired text\n" . 
+    "   --hoststamp    shows hostname\n" .
+    "   --timestamp    shows timestamp,\n" . 
+    "   --utimestamp   shows with microsecond (if this and -timestamps are used, this prevails)\n" . 
     "   --elapsedstamp shows time since run began" . 
-    "   --diffstamp shows time between last lines read\n" .
-    "   --quote shows each original line in single quotes\n" .
-    "   --suffix puts data at end, not start\n" .
-    "   --no-space puts no space between line read and additional data\n" .
+    "   --diffstamp    shows time between last lines read\n" .
+    "   --raw          shows elapsed and diffstamps in seconds, always\n" .
+    "   --quote        shows each original line in single quotes\n" .
+    "   --suffix       puts data at end, not start\n" .
+    "   --no-space     puts no space between line read and additional data\n" .
     "   --version shows version and exits\n" .
-    "     $prog is a filter which prepends data (like the time or the hostname) to lines read \n" .
+    "     $prog is a filter which prepends data (like the time or the hostname) to lines read\n" .
     "     from passed filenames or stdin.\n";
 }
 
@@ -58,6 +62,8 @@ main();
 
 # main()
 sub main {
+    # we should match the order here, in Usage() output, and in the pod
+    # Note also to update all when adding options
     GetOptions(
         "h|help!"          => \$help,
         "version!"         => \$version,
@@ -67,9 +73,10 @@ sub main {
         "quote!"           => \$quote,
         "timestamp!"       => \$timestamp,
         "utimestamp!"      => \$utimestamp,
+        "hoststamp!"       => \$hoststamp,
         "diffstamp!"       => \$diffstamp,
         "elapsedstamp!"    => \$elapsedstamp,
-        "hoststamp!"       => \$hoststamp,
+        "raw!",            => \$raw,
         #"loadstamp!"      => \$loadstamp,
         #"memstamp!"       => \$memstamp,
     ) or die Usage();
@@ -108,11 +115,11 @@ sub main {
         }
         if ($elapsedstamp) {
             push(@prefixes, 
-                sprintf("%s elapsed", convert_seconds_to_human_time( $time - $startt, 5 ) ) );
+                sprintf("%s elapsed", seconds_for_display( $time - $startt, 5 ) ) );
         }
         if ($diffstamp) {
             push(@prefixes, 
-                sprintf("%s diff", convert_seconds_to_human_time( $time - $lasttime, 5 ) ) );
+                sprintf("%s diff", seconds_for_display( $time - $lasttime, 5 ) ) );
         }
         #if ($loadstamp) {  # DEFERRED FEATURE
         #    require CPULoad;
@@ -160,19 +167,26 @@ sub getdatetime {
 # I couldn't find a module on cpan that did (exactly) this :)
 # the criteria is a short string describing the time duration, that's easy to parse.
 # (DateTime::Format::Human::Duration is similar, but won't show fractional durations like "1.2 mins"
-sub convert_seconds_to_human_time {
+sub seconds_for_display {
     my $t = shift;
     my $precision = shift || 2;
     my $format = '%1.' . ${precision} . "f";
 
+    if ($raw) { 
+        if (int($t) == $t) {
+            return "$t secs";
+        } else {
+            return sprintf( $format, $t ) . " secs";
+        }
+    }
+
     # start from largest unit, a year, and work towards smaller units
-    
     if (abs($t) >= 86400 * 365.25) {
         # this is not exact because we ignore leap years
         return sprintf($format, $t/(86400 * 365.25)) . " years"; 
     } 
 
-    # Considered, but removed, months entries in convert_seconds_to_human_time()
+    # Considered, but removed, months entries in seconds_for_display()
     # 1) hard to abbreviate months in 4 chars. mnths? 
     # 2) 2.1 months looks especially weird
     # 3) months are much more variable-sized than any other time unit
@@ -303,6 +317,11 @@ Add time elapsed since last line seen. Shows fractional time.
 
 This can be useful when tailing logfiles or output of programs
 and you want to see which lines take longer or shorter to output.
+
+=head2 --raw
+
+Show --elapsedstamp and --diffstamp times in seconds, and never in 
+other units (like minutes or microseonds, for example)
 
 =head2 --quote
 
