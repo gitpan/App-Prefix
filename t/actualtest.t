@@ -44,6 +44,9 @@ my @tests = (
 
     [ [$perl, $prefix,                        $two_word_file], 'cat--dog' ],      # basic test, no changes
     [ [$perl, $prefix, "-elapsed",            $two_word_file], '([0-9.]+ \S+ elapsed (cat|dog)(--)?){2}'],   
+    [ [$perl, $prefix, "-elapsed", "-raw",    $two_word_file], '([0-9.]+ secs elapsed (cat|dog)(--)?){2}'],   
+    [ [$perl, $prefix, "-diffstamp",          $two_word_file], '([0-9.]+ \S+ diff (cat|dog)(--)?){2}'],   
+    [ [$perl, $prefix, "-diffstamp", "-raw",  $two_word_file], '([0-9.]+ secs diff (cat|dog)(--)?){2}'],   
 );
 
 for my $t (@tests) {

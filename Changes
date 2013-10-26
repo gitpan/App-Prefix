@@ -1,5 +1,9 @@
 Revision history for App-Prefix
 
+0.18    2013/10/26
+        Add tests for --raw and --diffstamp options
+        Documentation typo fixed
+
 0.17    2013/10/25
         Add --raw option to always show elapsed times in seconds
         Remove another redundant test file

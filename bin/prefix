@@ -15,7 +15,7 @@ use File::Basename;
 use POSIX; # for strftime
 use List::Util qw(max);
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 my $prog=basename( $0 );
 my $help;
@@ -321,7 +321,7 @@ and you want to see which lines take longer or shorter to output.
 =head2 --raw
 
 Show --elapsedstamp and --diffstamp times in seconds, and never in 
-other units (like minutes or microseonds, for example)
+other units (like minutes or microseconds, for example)
 
 =head2 --quote
 
