@@ -7,11 +7,9 @@ README
 bin/prefix
 dist.ini
 lib/App/Prefix.pm
-t/00-load.t
 t/actualtest.t
 t/author-critic.t
 t/boilerplate.t
-t/exes.t
 t/one_word.dat
 t/prefix.t
 t/release-pod-syntax.t

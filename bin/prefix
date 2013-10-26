@@ -13,7 +13,7 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.14';
+our $VERSION = '0.16';
 
 my $prog=basename( $0 );
 my $help;

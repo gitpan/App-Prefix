@@ -1,5 +1,11 @@
 Revision history for App-Prefix
 
+0.16    2013/10/25
+        Removed another redundant test file
+
+0.15    2013/10/25
+        Removed redundant test file
+
 0.14    2013/10/25
         Correct documentation of --elapsedstamp option
         Add documentation for --diffstamp option
