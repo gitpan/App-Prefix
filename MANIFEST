@@ -18,4 +18,3 @@ t/release-pod-syntax.t
 t/sample.dat
 t/two_words.dat
 t/versions.t
-viap

@@ -13,7 +13,7 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 my $prog=basename( $0 );
 my $help;
@@ -211,7 +211,7 @@ sub convert_seconds_to_human_time {
 
 =head1 NAME     
             
-prefix - prefixes hostname time information or more to lines from stdin (or read from files)
+prefix - adds hostname, time information, or more to lines from stdin (or read from files)
                     
 =head1 SYNOPSIS     
                 
@@ -234,7 +234,8 @@ we would get real-time output like:
 Note that the hostname (host.example.com) and the date have been prepended to the lines from the file
 
 The prefix program also supports adding arbitrary text, current time to the microsecond, 
-time elapsed since invocation, time since last line output, and more.
+time elapsed since invocation, time since last line output, 
+adding text at the end instead of the beginning of the line, and more.
 
 =head1 DESCRIPTION 
 
@@ -274,7 +275,7 @@ Don't put a space between the original line read and the data added  to each lin
 
 =head2 --suffix
 
-Show added data at end of line, not start of line
+Show all added data at end of line, not start of line
 
 For example:
 
@@ -284,7 +285,7 @@ will output
     
     abc :Run17:
 
-whereas: 
+(note how the added text is now at the end of the line) whereas: 
 
     % echo "abc" | prefix -text=:Run17:
 
@@ -292,11 +293,16 @@ would output
 
     :Run17: abc
 
-=head2 --elapsed
+=head2 --elapsedstamp
 
-Show time elapsed since last line seen. Shows fractional time. 
+Add the time since the prefix program was started to each line
+
+=head2 --diffstamp
+
+Add time elapsed since last line seen. Shows fractional time. 
+
 This can be useful when tailing logfiles or output of programs
-and you want to see which lines to longer or shorter to output.
+and you want to see which lines take longer or shorter to output.
 
 =head2 --quote
 

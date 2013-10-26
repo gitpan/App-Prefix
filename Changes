@@ -1,5 +1,10 @@
 Revision history for App-Prefix
 
+0.14    2013/10/25
+        Correct documentation of --elapsedstamp option
+        Add documentation for --diffstamp option
+        Exclude development script from distribution
+
 0.13    2013/10/25
         Documentation improvements
         Make tests work on Win32
