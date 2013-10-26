@@ -1,5 +1,9 @@
 Revision history for App-Prefix
 
+0.13    2013/10/25
+        Documentation improvements
+        Make tests work on Win32
+
 0.12    2013/10/16
         Document the --elapsed feature better
         Other documentation improvements
@@ -30,7 +34,7 @@ Revision history for App-Prefix
 0.05    2013/10/13
         Fix documentation for --no-space, and some other cleanups
 
-0.001    2013/10/13
+0.001   2013/10/13
         Initial release.
         Implements [--text=prefix:] [--timestamp] [--utimestamp] [-hoststamp] [-no-space]
         [--diffstamp] [--elapsedstamp] [--quote] 

@@ -4,7 +4,9 @@ author:
   - 'joshr <joshr@cpan.org>'
 build_requires:
   File::Slurp: 0
+  File::Spec::Functions: 0
   File::Temp: 0
+  IPC::Run: 0
   Test::More: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.30
@@ -24,4 +26,4 @@ requires:
   Time::HiRes: 0
   strict: 0
   warnings: 0
-version: 0.12
+version: 0.13

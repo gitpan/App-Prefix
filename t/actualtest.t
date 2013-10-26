@@ -3,74 +3,65 @@
 use strict;
 use warnings;
 use Test::More;
-#use Test::More tests=>4;
-
-#if ( $ENV{RELEASE_TESTING} ) {
-#    plan( tests=>2 );
-#} else {
-#    plan( skip_all => "Author tests not required for installation, use env var RELEASE_TESTING to enable" );
-#}
-
+use File::Spec::Functions qw(catfile);
+use IPC::Run qw(run timeout);
 
 
 #unless ( $ENV{RELEASE_TESTING} ) {
 #    plan( skip_all => "Author tests not required for installation" );
 #}
-#
 
-my $perl = "$^X -w -Mstrict";   # warnings and strict on
-my @out = btick( "$perl bin/prefix -host t/sample.dat" );
+my $perl = $^X;
+# use catfile for win32 safety
+my $prefix         = catfile("bin", "prefix" );
+my $one_word_file  = catfile("t", "one_word.dat");
+my $two_word_file  = catfile("t", "two_words.dat");
+my $sample_file    = catfile("t", "sample.dat");
+
+my @out = like_btick( $perl, $prefix, "-host", $sample_file );
 cmp_ok( scalar(@out), '==', 5, "prefix: read t/sample.dat" );
 cmp_ok( $out[0], '=~', '.* OK: System operational', "line from test file looks as expected" );
 
+# set up command line stuff specifically for IPC::Run
 my @tests = (
 
-    [ "bin/prefix                  t/one_word.dat", 'sanguine$'],   # no option, no change
-    [ "bin/prefix -host            t/one_word.dat", '.* sanguine$' ], # test -host
-    [ "bin/prefix -host -suffix    t/one_word.dat", 'sanguine .*' ],  # test -suffix
+    [ [$perl, $prefix,                        $one_word_file], 'sanguine$'],   # no option, no change
+    [ [$perl, $prefix, "-host",               $one_word_file], '.* sanguine$' ], # test -host
+    [ [$perl, $prefix, "-host", "-suffix",    $one_word_file], 'sanguine .*' ],  # test -suffix
 
-    [ "bin/prefix -version",                        'prefix [0-9.]+$' ],   # test -version
+    [ [$perl, $prefix, "-version"                           ], 'prefix [0-9.]+$' ],   # test -version
 
-    [ "bin/prefix -text=A          t/one_word.dat", 'A sanguine$' ],
-    [ "bin/prefix -text=A -suffix  t/one_word.dat", 'sanguine A$' ],   # test -text=A
-    [ "bin/prefix -text=A -no-space t/one_word.dat", 'Asanguine$' ],   # test -no-space
-    [ "bin/prefix -text=A -quote   t/one_word.dat", 'A \'sanguine\'$' ],   # test -quote
+    [ [$perl, $prefix, "-text=A",             $one_word_file], 'A sanguine$' ],
+    [ [$perl, $prefix, "-text=A", "-suffix",  $one_word_file], 'sanguine A$' ],   # test -text=A
+    [ [$perl, $prefix, "-text=A", "-no-space",$one_word_file], 'Asanguine$' ],   # test -no-space
+    [ [$perl, $prefix, "-text=A", "-quote",   $one_word_file], 'A \'sanguine\'$' ],   # test -quote
 
-    [ "bin/prefix -timestamp       t/one_word.dat", '[-:0-9 ]+ sanguine$'],   # 2013-10-16 23:23:35 sanguine
-    [ "bin/prefix -utimestamp      t/one_word.dat", '[-:0-9. ]+ sanguine$'],   # 2013-10-16 23:23:35.12345 sanguine
+    [ [$perl, $prefix, "-timestamp",          $one_word_file], '[-:0-9 ]+ sanguine$'],   # 2013-10-16 23:23:35 sanguine
+    [ [$perl, $prefix, "-utimestamp",         $one_word_file], '[-:0-9. ]+ sanguine$'],   # 2013-10-16 23:23:35.12345 sanguine
 
-    [ "bin/prefix -utimestamp      t/one_word.dat", '[-:0-9. ]+ sanguine$'],   # 2013-10-16 23:23:35 sanguine
-    [ "bin/prefix -elapsed         t/one_word.dat", '[0-9.]+ \S+ elapsed sanguine$'],   
+    [ [$perl, $prefix, "-utimestamp",         $one_word_file], '[-:0-9. ]+ sanguine$'],   # 2013-10-16 23:23:35 sanguine
+    [ [$perl, $prefix, "-elapsed",            $one_word_file], '[0-9.]+ \S+ elapsed sanguine$'],   
 
-    [ "bin/prefix                  t/two_words.dat", 'cat--dog' ],      # basic test, no changes
-    [ "bin/prefix -elapsed         t/two_words.dat", '([0-9.]+ \S+ elapsed (cat|dog)(--)?){2}'],   
+    [ [$perl, $prefix,                        $two_word_file], 'cat--dog' ],      # basic test, no changes
+    [ [$perl, $prefix, "-elapsed",            $two_word_file], '([0-9.]+ \S+ elapsed (cat|dog)(--)?){2}'],   
 );
 
 for my $t (@tests) {
-    my ($cmd, $regex) = @$t;
-    (my $showcmd = $cmd) =~ s/  +/ /g;
-    my @lines = btick( $cmd );  # no newlines
+    my ($cmd_ref, $regex) = @$t;
+    my @cmd = @$cmd_ref;
+    my @lines = like_btick( @cmd );
     my $line = join( "--", @lines );  
+
+    my $showcmd = join(" ", @cmd);
+    $showcmd =~ s/\s+/ /g;
     ok( $line =~ /^$regex$/, "output of $showcmd =~ '$regex' ($line)" ); 
 }
 done_testing();
-
-
-
-# like backtick, but auto-testing, and prettier
-sub btick {
-    my @lines = `@_`;
-    if ($?) {
-        warn "@_\n";
-    }
-
-    # $? : The status returned by the last pipe close, backtick(``) 
-    # command or system operator. Note that this is the status 
-    # word returned by the wait() system call, so the exit value 
-    # of the subprocess is actually ($? >>*). $? & 255 gives 
-    # which signal, if any, the process died from, and whether 
-    # there was a core dump. 
-    chomp(@lines);
-    return @lines;
+sub like_btick {
+    my @cmd = @_;
+    my ($in, $out, $err) = ("", "", "");
+    run( \@cmd, \$in, \$out, \$err, timeout(2)) || ($err .= " (timeout)");
+    diag( $err ) if $err;
+    return split(/\n/, $out); # no newlines, just lines
 }
 

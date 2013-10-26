@@ -13,7 +13,7 @@ use File::Basename;
 use POSIX;
 use List::Util qw(max);
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 
 my $prog=basename( $0 );
 my $help;
@@ -233,6 +233,9 @@ we would get real-time output like:
 
 Note that the hostname (host.example.com) and the date have been prepended to the lines from the file
 
+The prefix program also supports adding arbitrary text, current time to the microsecond, 
+time elapsed since invocation, time since last line output, and more.
+
 =head1 DESCRIPTION 
 
 A text filter that prepends (or appends) data to lines read from stdin or named files, and echos them to stdout
@@ -279,7 +282,7 @@ For example:
 
 will output
     
-    abc "Run17:
+    abc :Run17:
 
 whereas: 
 
@@ -294,8 +297,6 @@ would output
 Show time elapsed since last line seen. Shows fractional time. 
 This can be useful when tailing logfiles or output of programs
 and you want to see which lines to longer or shorter to output.
-
-
 
 =head2 --quote
 
